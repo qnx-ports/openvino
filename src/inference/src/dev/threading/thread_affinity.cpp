@@ -11,14 +11,14 @@
 
 #include "openvino/runtime/system_conf.hpp"
 
-#if !(defined(__APPLE__) || defined(__EMSCRIPTEN__) || defined(_WIN32))
+#if !(defined(__APPLE__) || defined(__EMSCRIPTEN__) || defined(_WIN32) || defined(__QNX__))
 #    include <sched.h>
 #    include <unistd.h>
 #endif
 
 namespace ov {
 namespace threading {
-#if !(defined(__APPLE__) || defined(__EMSCRIPTEN__) || defined(_WIN32))
+#if !(defined(__APPLE__) || defined(__EMSCRIPTEN__) || defined(_WIN32) || defined(__QNX__))
 std::tuple<CpuSet, int> get_process_mask() {
     for (int ncpus = sizeof(cpu_set_t) / CHAR_BIT; ncpus < 32768 /* reasonable limit of #cores*/; ncpus <<= 1) {
         CpuSet mask{CPU_ALLOC(ncpus)};
@@ -130,6 +130,6 @@ bool pin_current_thread_by_mask(int ncores, const CpuSet& procMask) {
 bool pin_current_thread_to_socket(int socket) {
     return false;
 }
-#endif  // !(defined(__APPLE__) || defined(__EMSCRIPTEN__) || defined(_WIN32))
+#endif  // !(defined(__APPLE__) || defined(__EMSCRIPTEN__) || defined(_WIN32) || defined(__QNX__))
 }  // namespace threading
 }  // namespace ov

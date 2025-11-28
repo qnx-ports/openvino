@@ -151,7 +151,7 @@ bool check_open_mp_env_vars(bool include_omp_num_threads) {
     return false;
 }
 
-#if defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#if defined(__APPLE__) || defined(__EMSCRIPTEN__) || defined(__QNX__)
 // for Linux and Windows the getNumberOfCPUCores (that accounts only for physical cores) implementation is OS-specific
 // (see cpp files in corresponding folders), for __APPLE__ it is default :
 int get_number_of_cpu_cores(bool) {

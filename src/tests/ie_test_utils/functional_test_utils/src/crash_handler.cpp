@@ -8,10 +8,11 @@
 #include "functional_test_utils/crash_handler.hpp"
 #include <signal.h>
 #include <limits.h>
+#include <unix.h>
 
 namespace CommonTestUtils {
 
-#if defined(__APPLE__)
+#if defined(__APPLE__) || defined(__QNX__)
     typedef sig_t sighandler;
 #elif defined(_WIN32)
     typedef _crt_signal_t sighandler;

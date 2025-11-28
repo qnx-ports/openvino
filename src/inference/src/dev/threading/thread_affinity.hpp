@@ -8,14 +8,14 @@
 #include <tuple>
 #include <vector>
 
-#if !(defined(__APPLE__) || defined(__EMSCRIPTEN__) || defined(_WIN32))
+#if !(defined(__APPLE__) || defined(__EMSCRIPTEN__) || defined(_WIN32) || defined(__QNX__))
 #    include <sched.h>
 #endif
 
 namespace ov {
 namespace threading {
 
-#if (defined(__APPLE__) || defined(__EMSCRIPTEN__) || defined(_WIN32))
+#if (defined(__APPLE__) || defined(__EMSCRIPTEN__) || defined(_WIN32) || defined(__QNX__))
 using cpu_set_t = void;
 #endif  // (defined(__APPLE__) || defined(_WIN32))
 

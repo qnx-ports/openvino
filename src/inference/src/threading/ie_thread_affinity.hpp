@@ -10,12 +10,12 @@
 
 #include "dev/threading/thread_affinity.hpp"
 
-#if !(defined(__APPLE__) || defined(__EMSCRIPTEN__) || defined(_WIN32))
+#if !(defined(__APPLE__) || defined(__EMSCRIPTEN__) || defined(_WIN32) || defined(__QNX__))
 #    include <sched.h>
 #endif
 
 namespace InferenceEngine {
-#if (defined(__APPLE__) || defined(__EMSCRIPTEN__) || defined(_WIN32))
+#if (defined(__APPLE__) || defined(__EMSCRIPTEN__) || defined(_WIN32) || defined(__QNX__))
 using cpu_set_t = ov::threading::cpu_set_t;
 #endif  // (defined(__APPLE__) || defined(_WIN32))
 

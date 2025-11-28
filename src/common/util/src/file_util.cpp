@@ -198,6 +198,36 @@ static void iterate_files_worker(const std::string& path,
             while ((ent = readdir(dir)) != nullptr) {
                 std::string name = ent->d_name;
                 std::string path_name = ov::util::path_join({path, name});
+#   ifdef __QNX__
+                struct dirent_extra *dex;
+                for (dex = _DEXTRA_FIRST(ent); _DEXTRA_VALID(dex, ent);
+                     dex = _DEXTRA_NEXT(dex) ) {
+                    switch (dex->d_type) {
+                    case _DTYPE_STAT:
+                    case _DTYPE_LSTAT:
+                        struct dirent_extra_stat *dex_stat;
+                        dex_stat = (struct dirent_extra_stat *) dex;
+
+                        if ((dex_stat->d_stat.st_mode & S_IFDIR) == S_IFDIR) {
+                            if (name != "." && name != "..") {
+                                if (recurse) {
+                                    ov::util::iterate_files(path_name, func, recurse);
+                                }
+                                func(path_name, true);
+                            }
+                        } else if ((dex_stat->d_stat.st_mode & S_IFLNK) == S_IFLNK) {
+                            if (include_links) {
+                                func(path_name, false);
+                            }
+                        } else if ((dex_stat->d_stat.st_mode & S_IFREG) == S_IFREG) {
+                            func(path_name, false);
+                        }
+                        break;
+                    default:
+                        break;
+                    }
+                }
+#   else
                 switch (ent->d_type) {
                 case DT_DIR:
                     if (name != "." && name != "..") {
@@ -222,6 +252,7 @@ static void iterate_files_worker(const std::string& path,
                 default:
                     break;
                 }
+#   endif
             }
         } catch (...) {
             std::exception_ptr p = std::current_exception();
@@ -452,7 +483,7 @@ std::string get_ov_library_path_a() {
     }
     GetModuleFileNameA(hm, (LPSTR)ov_library_path, sizeof(ov_library_path));
     return get_path_name(std::string(ov_library_path));
-#elif defined(__APPLE__) || defined(__linux__) || defined(__EMSCRIPTEN__)
+#elif defined(__APPLE__) || defined(__linux__) || defined(__EMSCRIPTEN__) || defined(__QNX__)
     Dl_info info;
     dladdr(reinterpret_cast<void*>(ov::util::get_ov_lib_path), &info);
     return get_path_name(ov::util::get_absolute_file_path(info.dli_fname)).c_str();
@@ -490,7 +521,7 @@ std::wstring ov::util::get_ov_lib_path_w() {
     }
     GetModuleFileNameW(hm, (LPWSTR)ov_library_path, sizeof(ov_library_path) / sizeof(ov_library_path[0]));
     return get_path_name(std::wstring(ov_library_path));
-#    elif defined(__linux__) || defined(__APPLE__) || defined(__EMSCRIPTEN__)
+#    elif defined(__linux__) || defined(__APPLE__) || defined(__EMSCRIPTEN__) || defined(__QNX__)
     return ov::util::string_to_wstring(get_ov_library_path_a());
 #    else
 #        error "Unsupported OS"
