@@ -195,7 +195,9 @@ macro(ov_add_sample)
     endif()
 
     # for cross-compilation with gflags
-    find_package(Threads REQUIRED)
+    if(NOT QNX)
+        find_package(Threads REQUIRED)
+    endif()
 
     find_package(OpenVINO REQUIRED COMPONENTS Runtime)
     if(c_sample)
@@ -213,7 +215,10 @@ macro(ov_add_sample)
     endif()
     target_include_directories(${SAMPLE_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../common")
 
-    target_link_libraries(${SAMPLE_NAME} PRIVATE ${ov_link_libraries} Threads::Threads ${SAMPLE_DEPENDENCIES})
+    target_link_libraries(${SAMPLE_NAME} PRIVATE ${ov_link_libraries} ${SAMPLE_DEPENDENCIES})
+    if(NOT QNX)
+        target_link_libraries(${SAMPLE_NAME} PRIVATE Threads::Threads)
+    endif()
 
     install(TARGETS ${SAMPLE_NAME}
             RUNTIME DESTINATION samples_bin/

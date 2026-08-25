@@ -23,11 +23,11 @@
 #include "intel_gpu/op/placeholder.hpp"
 #include "openvino/util/pp.hpp"
 
-#ifdef __linux__
+#if defined(__linux__) || defined(__QNX__)
 # include <dlfcn.h>
 #endif
 
-#if defined(__unix__) && !defined(__ANDROID__)
+#if (defined(__unix__) || defined(__QNX__)) && !defined(__ANDROID__)
 #include <malloc.h>
 #endif
 
@@ -85,7 +85,7 @@ ProgramBuilder::ProgramBuilder(std::shared_ptr<ov::Model> model, cldnn::engine& 
         (LPCSTR)CustomLayer::LoadFromFile,
         &nModule);
     GetModuleFileName(nModule, mpath, sizeof(mpath));
-#elif __linux__
+#elif __linux__ || __QNX__
     Dl_info dl_info;
     dladdr(reinterpret_cast<void *>(CustomLayer::LoadFromFile), &dl_info);
     const char* mpath = dl_info.dli_fname;

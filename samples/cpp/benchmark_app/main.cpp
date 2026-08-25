@@ -41,7 +41,7 @@
 #include <psapi.h>
 #elif defined(__APPLE__)
 #include <sys/resource.h>
-#elif defined(__linux__)
+#elif defined(__linux__) || defined(__QNX__)
 #include <fstream>
 #include <regex>
 #include <sstream>

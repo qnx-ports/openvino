@@ -537,7 +537,9 @@ if(NOT _OV_ENABLE_OPENVINO_BUILD_SHARED)
     _ov_find_intel_gpu_dependencies()
 endif()
 
+if(NOT QNX)
 _ov_find_dependency(Threads)
+endif()
 
 unset(_OV_ENABLE_OPENVINO_BUILD_SHARED)
 

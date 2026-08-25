@@ -24,6 +24,8 @@ namespace threading {
 using cpu_set_t = void;
 #elif defined(_WIN32)
 using cpu_set_t = DWORD_PTR;
+#elif defined(__QNX__)
+using cpu_set_t = uint32_t;
 #endif
 
 /**
