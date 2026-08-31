@@ -164,13 +164,15 @@ std::tuple<CpuSet, int> get_process_mask() {
 }
 
 void release_process_mask(cpu_set_t* mask) {
-    if (mask != nullptr)
+    if (mask != nullptr) {
         delete mask;
+    }
 }
 
 bool pin_current_thread_by_mask(int ncores, const CpuSet& procMask) {
-    if (procMask == nullptr)
+    if (procMask == nullptr) {
         return false;
+    }
     uint32_t mask = *procMask.get();
     return ThreadCtl(_NTO_TCTL_RUNMASK_GET_AND_SET, reinterpret_cast<void*>(&mask)) != -1;
 }
@@ -180,12 +182,14 @@ bool pin_thread_to_vacant_core(int thrIdx,
                                int ncores,
                                const CpuSet& procMask,
                                const std::vector<int>& cpu_ids) {
-    if (procMask == nullptr)
+    if (procMask == nullptr) {
         return false;
+    }
     const uint32_t mask_val = *procMask.get();
     const int num_cpus = __builtin_popcount(mask_val);
-    if (num_cpus == 0)
+    if (num_cpus == 0) {
         return false;
+    }
     thrIdx %= num_cpus;
 
     int mapped_idx = -1;
@@ -195,13 +199,15 @@ bool pin_thread_to_vacant_core(int thrIdx,
         int cpu_idx = 0;
         for (int i = 0, offset = 0; i < thrIdx; ++i) {
             cpu_idx += hyperthreads;
-            if (cpu_idx >= num_cpus)
+            if (cpu_idx >= num_cpus) {
                 cpu_idx = ++offset;
+            }
         }
         while (cpu_idx >= 0) {
             mapped_idx++;
-            if (mask_val & (1U << mapped_idx))
+            if (mask_val & (1U << mapped_idx)) {
                 --cpu_idx;
+            }
         }
     }
 

@@ -54,8 +54,9 @@ CPU::CPU() {
     // find P and E cores
     uint16_t pcount = 0;
     for (uint16_t idx = 0; idx < num_cores; idx++ ) {
-        if(cpus[idx].speed == max_speed)
+        if(cpus[idx].speed == max_speed) {
             pcount++;
+        }
     }
 
     system_info_table["logical_cores"] = static_cast<int32_t>(num_cores);
@@ -141,8 +142,9 @@ void parse_processor_info_qnx(std::map<std::string, int> system_info_table,
                 _cpu_mapping_table[idx][CPU_MAP_CORE_TYPE] = (idx & 1) ? 4 : 1;
             }
             else {
-                if (e_core_idx == 0)
+                if (e_core_idx == 0) {
                   e_core_idx = idx / 2;
+                }
                 _cpu_mapping_table[idx][CPU_MAP_CORE_ID] = e_core_idx;
                 _cpu_mapping_table[idx][CPU_MAP_CORE_TYPE] = 2;
                 e_core_idx++;
@@ -157,9 +159,10 @@ void parse_processor_info_qnx(std::map<std::string, int> system_info_table,
 
     uint32_t l2_cache_idx = 0;
     for(auto &l2_cache : l2_cache_map) {
-        for(auto &idx : l2_cache.second)
+        for(auto &idx : l2_cache.second) {
             _cpu_mapping_table[idx][CPU_MAP_GROUP_ID] = l2_cache_idx;
-        l2_cache_idx;
+        }
+        l2_cache_idx++;
     }
 
 }

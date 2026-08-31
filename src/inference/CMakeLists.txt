@@ -41,7 +41,7 @@ elseif(QNX)
     file (GLOB LIBRARY_HEADERS
          ${LIBRARY_HEADERS}
          ${CMAKE_CURRENT_SOURCE_DIR}/src/os/qnx/*.hpp)
-elseif(EMSCRIPTEN)
+elseif(NOT EMSCRIPTEN)
     file (GLOB LIBRARY_SRC
           ${LIBRARY_SRC}
           ${CMAKE_CURRENT_SOURCE_DIR}/src/os/lin/*.cpp)
