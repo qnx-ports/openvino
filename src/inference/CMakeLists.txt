@@ -34,6 +34,13 @@ elseif(APPLE)
     file (GLOB LIBRARY_HEADERS
         ${LIBRARY_HEADERS}
         ${CMAKE_CURRENT_SOURCE_DIR}/src/os/mac/*.hpp)
+elseif(QNX)
+    file (GLOB LIBRARY_SRC
+          ${LIBRARY_SRC}
+          ${CMAKE_CURRENT_SOURCE_DIR}/src/os/qnx/*.cpp)
+    file (GLOB LIBRARY_HEADERS
+         ${LIBRARY_HEADERS}
+         ${CMAKE_CURRENT_SOURCE_DIR}/src/os/qnx/*.hpp)
 elseif(NOT EMSCRIPTEN)
     file (GLOB LIBRARY_SRC
           ${LIBRARY_SRC}

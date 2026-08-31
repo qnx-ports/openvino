@@ -214,4 +214,15 @@ void parse_processor_info_macos(const std::vector<std::pair<std::string, uint64_
                                 std::vector<std::vector<int>>& _proc_type_table);
 #endif
 
+#if defined(__QNX__)
+void parse_processor_info_qnx(std::map<std::string, int> system_info_table,
+                              int& _processors,
+                              int& _numa_nodes,
+                              int& _sockets,
+                              int& _cores,
+                              int& _blocked_cores,
+                              std::vector<std::vector<int>>& _proc_type_table,
+                              std::vector<std::vector<int>>& _cpu_mapping_table);
+#endif
+
 }  // namespace ov

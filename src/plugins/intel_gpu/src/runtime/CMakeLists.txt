@@ -83,7 +83,7 @@ set_target_properties(${TARGET_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION_REL
 
 if(WIN32)
   target_link_libraries(${TARGET_NAME} PRIVATE setupapi)
-elseif((NOT ANDROID) AND (UNIX))
+elseif((NOT (ANDROID OR QNX)) AND (UNIX))
   target_link_libraries(${TARGET_NAME} PRIVATE pthread)
 endif()
 

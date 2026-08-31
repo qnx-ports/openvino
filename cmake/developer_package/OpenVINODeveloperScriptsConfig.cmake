@@ -261,7 +261,9 @@ endif()
 # General flags
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
+if (NOT QNX)
+    find_package(Threads REQUIRED)
+endif()
 
 include(compile_flags/sdl)
 include(compile_flags/os_flags)

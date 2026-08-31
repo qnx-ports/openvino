@@ -34,8 +34,14 @@ if(ARM_COMPUTE_INCLUDE_DIR OR ARM_COMPUTE_LIB_DIR)
             endif()
         endif()
 
+        if(QNX)
+            set(acl_lib_name arm_compute)
+        else()
+            set(acl_lib_name arm_compute-static)
+        endif()
+
         find_library(ARM_COMPUTE_LIB
-                     NAMES arm_compute-static
+                     NAMES ${acl_lib_name}
                      PATHS ${ARM_COMPUTE_LIB_DIR}
                      ${extra_args})
         unset(extra_args)
