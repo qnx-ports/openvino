@@ -167,4 +167,3 @@ void parse_processor_info_qnx(std::map<std::string, int> system_info_table,
 }
 
 } // namespace ov
-
