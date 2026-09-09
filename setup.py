@@ -32,7 +32,7 @@ PYTHON_VERSION = f"python{sys.version_info.major}.{sys.version_info.minor}{suffi
 LIBS_DIR = "bin" if platform.system() == "Windows" else "lib"
 
 machine = platform.machine()
-if machine == "x86_64" or machine == "AMD64":
+if machine == "x86_64" or machine == "AMD64" or machine == "x86pc":
     ARCH = "intel64"
 elif machine == "X86" or machine == "i686":
     ARCH = "ia32"
@@ -42,8 +42,6 @@ elif machine == "aarch64" or machine == "arm64" or machine == "ARM64":
     ARCH = "arm64"
 elif machine == "riscv64":
     ARCH = "riscv64"
-else:
-    ARCH = machine
 
 # The following variables can be defined in environment or .env file
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -57,7 +55,7 @@ OV_RUNTIME_LIBS_DIR = os.getenv("OV_RUNTIME_LIBS_DIR", f"runtime/{LIBS_DIR}/{ARC
 TBB_LIBS_DIR = os.getenv("TBB_LIBS_DIR", f"runtime/3rdparty/tbb/{LIBS_DIR}")
 PUGIXML_LIBS_DIR = os.getenv("PUGIXML_LIBS_DIR", f"runtime/3rdparty/pugixml/{LIBS_DIR}")
 PY_PACKAGES_DIR = os.getenv("PY_PACKAGES_DIR", "python")
-LIBS_RPATH = "$ORIGIN" if sys.platform == "linux" else "@loader_path"
+LIBS_RPATH = "$ORIGIN" if sys.platform == "linux" or sys.platform.startswith("qnx") else "@loader_path"
 PYTHON_EXTENSIONS_ONLY = True if os.getenv("PYTHON_EXTENSIONS_ONLY") is not None else False
 SKIP_RPATH = True if os.getenv("SKIP_RPATH") is not None else False
 CPACK_GENERATOR = os.getenv("CPACK_GENERATOR", "TGZ")
@@ -384,7 +382,7 @@ class PrepareLibs(build_clib):
                     continue
 
                 for path in filter(
-                    lambda x: any(item in ([".so"] if sys.platform == "linux" else [".dylib", ".so"])
+                    lambda x: any(item in ([".so"] if sys.platform == "linux" or sys.platform.startswith("qnx") else [".dylib", ".so"])
                                   for item in x.suffixes), install_dir_path.glob("*"),
                 ):
                     set_rpath(comp_data["rpath"], os.path.realpath(path))
@@ -685,7 +683,7 @@ def set_rpath(rpath, binary):
     cmd = []
     rpath_tool = ""
 
-    if sys.platform == "linux":
+    if sys.platform == "linux" or sys.platform.startswith("qnx"):
         with open(os.path.realpath(binary), "rb") as file:
             if file.read(1) != b"\x7f":
                 log.warning(f"WARNING: {binary}: missed ELF header")
@@ -699,6 +697,8 @@ def set_rpath(rpath, binary):
         sys.exit(f"Unsupported platform: {sys.platform}")
 
     if not is_tool(rpath_tool):
+        if sys.platform.startswith("qnx"):
+            return
         sys.exit(f"Could not find {rpath_tool} on the system, " f"please make sure that this tool is installed")
 
     if sys.platform == "darwin":
@@ -712,7 +712,7 @@ def find_prebuilt_extensions(search_dirs):
     """Collect prebuilt python extensions."""
     extensions = []
     ext_pattern = ""
-    if sys.platform == "linux":
+    if sys.platform == "linux" or sys.platform.startswith("qnx"):
         ext_pattern = "**/*.so"
     elif sys.platform == "win32":
         ext_pattern = "**/*.pyd"
