@@ -42,6 +42,8 @@ elif machine == "aarch64" or machine == "arm64" or machine == "ARM64":
     ARCH = "arm64"
 elif machine == "riscv64":
     ARCH = "riscv64"
+else:
+    ARCH = machine
 
 # The following variables can be defined in environment or .env file
 SCRIPT_DIR = Path(__file__).resolve().parent

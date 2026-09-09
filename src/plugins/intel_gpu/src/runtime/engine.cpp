@@ -31,7 +31,7 @@ static size_t get_cpu_ram_size() {
     GlobalMemoryStatusEx(&s);
     return s.ullTotalPhys;
 }
-#elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__QNX__)
+#elif defined(__APPLE__) || defined(__FreeBSD__)
 # include <unistd.h>
 # include <sys/sysctl.h>
 
@@ -47,6 +47,16 @@ static size_t get_cpu_ram_size() {
 
     sysctl(query_ram, query_ram_len, &totalram, &length, NULL, 0);
     return totalram;
+}
+#elif defined(__QNX__)
+# include <unistd.h>
+# include <limits.h>
+
+static size_t get_cpu_ram_size() {
+    long pages = sysconf(_SC_PHYS_PAGES);
+    long page_size = sysconf(_SC_PAGE_SIZE);
+    if (pages == -1 || page_size == -1) return 0;
+    return static_cast<size_t>(pages) * static_cast<size_t>(page_size);
 }
 #else
 # include <sys/sysinfo.h>
