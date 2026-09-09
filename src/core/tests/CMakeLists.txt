@@ -26,21 +26,6 @@ list(APPEND UNIT_TESTS_DEPENDENCIES openvino_template_extension)
 
 list(APPEND EXCLUDE_TESTS ${CMAKE_CURRENT_SOURCE_DIR}/dnnl.cpp)
 
-set(OPENVINO_LIBS
-    common_test_utils
-    openvino::reference
-    openvino::util
-    openvino::shape_inference
-    ${CMAKE_DL_LIBS}
-    openvino::conditional_compilation
-    openvino::runtime::dev
-    openvino::xml_util
-)
-
-if(NOT QNX)
-    list(APPEND OPENVINO_LIBS Threads::Threads)
-endif()
-
 ov_add_test_target(
     NAME ${TARGET_NAME}
         ROOT ${CMAKE_CURRENT_SOURCE_DIR}
@@ -51,11 +36,22 @@ ov_add_test_target(
             # process models
             test_model_zoo
         LINK_LIBRARIES
-            ${OPENVINO_LIBS}
+            common_test_utils
+            openvino::reference
+            openvino::util
+            openvino::shape_inference
+            ${CMAKE_DL_LIBS}
+            openvino::conditional_compilation
+            openvino::runtime::dev
+            openvino::xml_util
         ADD_CLANG_FORMAT
         LABELS
             OV UNIT CORE
 )
+
+if(NOT QNX)
+    target_link_libraries(${TARGET_NAME} PRIVATE Threads::Threads)
+endif()
 
 target_include_directories(${TARGET_NAME} PRIVATE $<TARGET_PROPERTY:openvino_core_obj,SOURCE_DIR>/src
                                                   ${CMAKE_CURRENT_SOURCE_DIR})
