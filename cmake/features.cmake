@@ -83,7 +83,7 @@ Usage: -DSELECTIVE_BUILD=ON -DSELECTIVE_BUILD_STAT=/path/*.csv" OFF
 ov_option (ENABLE_DOCS "Build docs using Doxygen" OFF)
 
 find_package(PkgConfig QUIET)
-ov_dependent_option (ENABLE_PKGCONFIG_GEN "Enable openvino.pc pkg-config file generation" ON "LINUX OR APPLE;PkgConfig_FOUND;BUILD_SHARED_LIBS" OFF)
+ov_dependent_option (ENABLE_PKGCONFIG_GEN "Enable openvino.pc pkg-config file generation" ON "LINUX OR APPLE OR QNX;PkgConfig_FOUND;BUILD_SHARED_LIBS" OFF)
 
 #
 # OpenVINO Runtime specific options
@@ -116,7 +116,7 @@ endif()
 ov_dependent_option (ENABLE_INTEL_OPENMP "Enables usage of Intel OpenMP instead of default compiler one" ${ENABLE_INTEL_OPENMP_DEFAULT} "THREADING STREQUAL OMP" OFF)
 
 if((THREADING STREQUAL "TBB" OR THREADING STREQUAL "TBB_AUTO" OR THREADING STREQUAL "TBB_ADAPTIVE") AND
-    (BUILD_SHARED_LIBS OR (LINUX AND X86_64)))
+    (BUILD_SHARED_LIBS OR ((LINUX OR QNX)AND X86_64)))
     set(ENABLE_TBBBIND_2_5_DEFAULT ON)
 else()
     set(ENABLE_TBBBIND_2_5_DEFAULT OFF)
@@ -209,6 +209,8 @@ ov_dependent_option (ENABLE_SYSTEM_SNAPPY "Enables use of system version of Snap
 # the option is turned off by default, because we are not sure that system version of ZE loader is fresh enough
 ov_dependent_option (ENABLE_SYSTEM_LEVEL_ZERO "Enables use of system version of Level Zero" OFF
     "ENABLE_INTEL_NPU" OFF)
+ov_option(ENABLE_SYSTEM_GFLAGS "Enables use of system gflags" OFF)
+ov_option(ENABLE_SYSTEM_ZLIB "Enables use of system zlib" OFF)
 
 ov_dependent_option(ENABLE_JS "Enables JS API building" ${ENABLE_JS_DEFAULT} "NOT ANDROID;NOT EMSCRIPTEN" OFF)
 

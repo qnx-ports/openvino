@@ -104,6 +104,8 @@ target_include_directories(${TARGET_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 
 if(WIN32)
   target_link_libraries(${TARGET_NAME} PRIVATE setupapi)
+elseif(QNX)
+  target_link_libraries(${TARGET_NAME} PRIVATE socket)
 elseif((NOT ANDROID) AND (UNIX))
   target_link_libraries(${TARGET_NAME} PRIVATE pthread)
 endif()

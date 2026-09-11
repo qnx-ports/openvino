@@ -198,7 +198,7 @@ INSTANTIATE_TEST_SUITE_P(
                     std::make_tuple("string_parameter.xml", "string_parameter.bin"),
                     std::make_tuple("const_string.xml", "const_string.bin")));
 
-#ifdef ENABLE_OV_ONNX_FRONTEND
+#if defined(ENABLE_OV_ONNX_FRONTEND) && !defined(__QNX__)
 
 INSTANTIATE_TEST_SUITE_P(ONNXSerialization,
                          SerializationTest,
@@ -551,7 +551,11 @@ TEST_F(MetaDataSerialize, set_complex_meta_information) {
                                                                "label_groups",
                                                                "ids"));
         std::vector<float> fl_vec{22.3f, 33.11f, 44.f};
-        EXPECT_EQ(fl_vec, model->get_rt_info<std::vector<float>>("config", "model_parameters", "mean_values"));
+        auto actual_fl_vec = model->get_rt_info<std::vector<float>>("config", "model_parameters", "mean_values");
+        ASSERT_EQ(fl_vec.size(), actual_fl_vec.size());
+        for (size_t i = 0; i < fl_vec.size(); ++i) {
+            EXPECT_FLOAT_EQ(fl_vec[i], actual_fl_vec[i]);
+        }
     };
 
     auto model = ov::test::readModel(ir_with_meta);

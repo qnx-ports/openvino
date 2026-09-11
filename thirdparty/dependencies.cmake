@@ -166,7 +166,12 @@ endif()
 #
 
 if(ENABLE_SAMPLES OR ENABLE_TESTS)
-    add_subdirectory(thirdparty/zlib EXCLUDE_FROM_ALL)
+    if(ENABLE_SYSTEM_ZLIB)
+        find_package(ZLIB REQUIRED)
+        add_library(openvino::zlib ALIAS ZLIB::ZLIB)
+    else()
+        add_subdirectory(thirdparty/zlib EXCLUDE_FROM_ALL)
+    endif()
 endif()
 
 #
@@ -310,11 +315,21 @@ endif()
 #
 
 if(ENABLE_SAMPLES OR ENABLE_TESTS OR ENABLE_INTEL_NPU_INTERNAL)
-    add_subdirectory(thirdparty/gflags EXCLUDE_FROM_ALL)
-    ov_developer_package_export_targets(
-        TARGET gflags
-        INSTALL_INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}/thirdparty/gflags/gflags/include/gflags"
-        INSTALL_DESTIONATION "developer_package/include/gflags")
+    if(ENABLE_SYSTEM_GFLAGS)
+        find_package(gflags REQUIRED)
+        # Create an alias so internal targets can link to 'gflags' seamlessly
+        if(TARGET gflags::gflags AND NOT TARGET gflags)
+            add_library(gflags ALIAS gflags::gflags)
+        elseif(TARGET gflags-shared AND NOT TARGET gflags)
+            add_library(gflags ALIAS gflags-shared)
+        endif()
+    else()
+        add_subdirectory(thirdparty/gflags EXCLUDE_FROM_ALL)
+        ov_developer_package_export_targets(
+            TARGET gflags
+            INSTALL_INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}/thirdparty/gflags/gflags/include/gflags"
+            INSTALL_DESTIONATION "developer_package/include/gflags")
+    endif()
 endif()
 
 #
@@ -360,22 +375,29 @@ if(ENABLE_OV_PADDLE_FRONTEND OR ENABLE_OV_ONNX_FRONTEND OR ENABLE_OV_TF_FRONTEND
         if(CMAKE_VERBOSE_MAKEFILE)
             set(Protobuf_DEBUG ON)
         endif()
-        # try to find newer version first (major is changed)
-        # see https://protobuf.dev/support/version-support/ and
-        # https://github.com/protocolbuffers/protobuf/commit/d61f75ff6db36b4f9c0765f131f8edc2f86310fa
-        find_package(Protobuf 5.26.0 QUIET CONFIG)
-        if(NOT Protobuf_FOUND)
-            find_package(Protobuf 4.22.0 QUIET CONFIG)
-        endif()
-        if(Protobuf_FOUND)
-            # protobuf was found via CONFIG mode, let's save it for later usage in OpenVINOConfig.cmake static build
+        if(QNX)
+            # QNX has a newer protobuf version which fails OpenVINO's strict version checks.
+            # We force CONFIG mode to avoid target collisions with ONNX's find_package(Protobuf).
+            find_package(Protobuf REQUIRED CONFIG)
             set(protobuf_config CONFIG)
         else()
-            if(OV_VCPKG_BUILD)
-                set(protobuf_config CONFIG)
+            # try to find newer version first (major is changed)
+            # see https://protobuf.dev/support/version-support/ and
+            # https://github.com/protocolbuffers/protobuf/commit/d61f75ff6db36b4f9c0765f131f8edc2f86310fa
+            find_package(Protobuf 5.26.0 QUIET CONFIG)
+            if(NOT Protobuf_FOUND)
+                find_package(Protobuf 4.22.0 QUIET CONFIG)
             endif()
-            # otherwise, fallback to existing default
-            find_package(Protobuf 3.20.3 REQUIRED ${protobuf_config})
+            if(Protobuf_FOUND)
+                # protobuf was found via CONFIG mode, let's save it for later usage in OpenVINOConfig.cmake static build
+                set(protobuf_config CONFIG)
+            else()
+                if(OV_VCPKG_BUILD)
+                    set(protobuf_config CONFIG)
+                endif()
+                # otherwise, fallback to existing default
+                find_package(Protobuf 3.20.3 REQUIRED ${protobuf_config})
+            endif()
         endif()
 
         # with newer protobuf versions (4.22 and newer), we use CONFIG first

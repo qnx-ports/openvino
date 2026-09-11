@@ -6,9 +6,10 @@ if(CMAKE_COMPILER_IS_GNUCXX OR OV_COMPILER_IS_CLANG OR (UNIX AND OV_COMPILER_IS_
     set(OV_C_CXX_FLAGS "${OV_C_CXX_FLAGS} -Wformat -Wformat-security")
 
     if (NOT ENABLE_SANITIZER)
-        if(EMSCRIPTEN)
+        if(EMSCRIPTEN OR QNX)
             # emcc does not support fortification, see:
             # https://stackoverflow.com/questions/58854858/undefined-symbol-stack-chk-guard-in-libopenh264-so-when-building-ffmpeg-wit
+            # QNX has a C++ fortification bug in wchar_chk.h
         else()
             # ASan does not support fortification https://github.com/google/sanitizers/issues/247
             set(OV_C_CXX_FLAGS "${OV_C_CXX_FLAGS} -D_FORTIFY_SOURCE=2")
