@@ -71,6 +71,14 @@ size_t getVmRSSInKB() {
     return getMemoryInfo().WorkingSetSize / 1024;
 }
 
+#elif __QNX__
+size_t getVmSizeInKB() {
+    return 0;
+}
+size_t getVmRSSInKB() {
+    return 0;
+}
+
 #else
 
 size_t getSystemDataByName(char* name) {

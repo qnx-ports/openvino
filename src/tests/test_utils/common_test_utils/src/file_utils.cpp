@@ -106,7 +106,7 @@ std::string getExecutableDirectoryA() {
 #ifdef _WIN32
     char buffer[MAX_PATH];
     int len = GetModuleFileNameA(NULL, buffer, MAX_PATH);
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) || defined(__QNX__)
     Dl_info info;
     dladdr(reinterpret_cast<void*>(getExecutableDirectory), &info);
     const char* buffer = info.dli_fname;
