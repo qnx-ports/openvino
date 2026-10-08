@@ -154,27 +154,23 @@ bool pin_current_thread_to_socket(int socket) {
 }
 #elif __QNX__
 std::tuple<CpuSet, int> get_process_mask() {
-    uint32_t *runmask = new uint32_t(0);
-    if (ThreadCtl(_NTO_TCTL_RUNMASK_GET_AND_SET, reinterpret_cast<void*>(runmask)) != -1) {
+    cpu_set_t *runmask = new cpu_set_t(~0u);
+
+    if (ThreadCtl(_NTO_TCTL_RUNMASK_GET_AND_SET, runmask) != -1) {
+
+        cpu_set_t tmpmask = *runmask;
+        ThreadCtl(_NTO_TCTL_RUNMASK_GET_AND_SET, &tmpmask);
+
         CpuSet mask{runmask};
-        return std::make_tuple(std::move(mask), static_cast<int>(sizeof(uint32_t)));
+        return std::make_tuple(std::move(mask), static_cast<int>(sizeof(cpu_set_t)));
     }
+
     delete runmask;
     return std::make_tuple(CpuSet(nullptr), 0);
 }
 
 void release_process_mask(cpu_set_t* mask) {
-    if (mask != nullptr) {
-        delete mask;
-    }
-}
-
-bool pin_current_thread_by_mask(int ncores, const CpuSet& procMask) {
-    if (procMask == nullptr) {
-        return false;
-    }
-    uint32_t mask = *procMask.get();
-    return ThreadCtl(_NTO_TCTL_RUNMASK_GET_AND_SET, reinterpret_cast<void*>(&mask)) != -1;
+    delete mask;
 }
 
 bool pin_thread_to_vacant_core(int thrIdx,
@@ -213,6 +209,18 @@ bool pin_thread_to_vacant_core(int thrIdx,
 
     CpuSet targetMask{new uint32_t(1U << mapped_idx)};
     return pin_current_thread_by_mask(ncores, targetMask);
+}
+
+bool pin_current_thread_by_mask(int ncores, const CpuSet& procMask) {
+    if (procMask == nullptr) {
+        return false;
+    }
+    uint32_t mask = *procMask.get();
+    return ThreadCtl(_NTO_TCTL_RUNMASK_GET_AND_SET, &mask) != -1;
+}
+
+bool pin_current_thread_to_socket(int socket) {
+    return false;
 }
 #else   // no threads pinning/binding on MacOS
 std::tuple<CpuSet, int> get_process_mask() {

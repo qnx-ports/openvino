@@ -51,12 +51,19 @@ static size_t get_cpu_ram_size() {
 #elif defined(__QNX__)
 # include <unistd.h>
 # include <limits.h>
+# include <sys/syspage.h>
 
 static size_t get_cpu_ram_size() {
-    long pages = sysconf(_SC_PHYS_PAGES);
-    long page_size = sysconf(_SC_PAGE_SIZE);
-    if (pages == -1 || page_size == -1) return 0;
-    return static_cast<size_t>(pages) * static_cast<size_t>(page_size);
+    struct asinfo_entry *as = SYSPAGE_ENTRY(asinfo);
+    int n = (int)(SYSPAGE_ENTRY_SIZE(asinfo) / sizeof(*as));
+    const char* strings = SYSPAGE_ENTRY(strings)->data;
+
+    size_t total = 0;
+    for (int i = 0; i < n; i++) {
+        if (strcmp(strings + as[i].name, "ram") == 0)
+            total += as[i].end - as[i].start + 1;
+    }
+    return total;
 }
 #else
 # include <sys/sysinfo.h>

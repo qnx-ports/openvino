@@ -317,7 +317,7 @@ endif()
 if(ENABLE_SAMPLES OR ENABLE_TESTS OR ENABLE_INTEL_NPU_INTERNAL)
     if(ENABLE_SYSTEM_GFLAGS)
         find_package(gflags REQUIRED)
-        # Create an alias so internal targets can link to 'gflags' seamlessly
+        # create an alias so internal targets can link to 'gflags' smoothly
         if(TARGET gflags::gflags AND NOT TARGET gflags)
             add_library(gflags ALIAS gflags::gflags)
         elseif(TARGET gflags-shared AND NOT TARGET gflags)
