@@ -16,9 +16,14 @@
 #    include <unistd.h>
 #endif
 
+#if defined(__QNX__)
+#    include <sys/neutrino.h>
+#    include <sys/syspage.h>
+#endif
+
 namespace ov {
 namespace threading {
-#if !(defined(__APPLE__) || defined(__EMSCRIPTEN__) || defined(_WIN32))
+#if !(defined(__APPLE__) || defined(__EMSCRIPTEN__) || defined(_WIN32) || defined(__QNX__))
 std::tuple<CpuSet, int> get_process_mask() {
     for (int ncpus = sizeof(cpu_set_t) / CHAR_BIT; ncpus < 32768 /* reasonable limit of #cores*/; ncpus <<= 1) {
         CpuSet mask{CPU_ALLOC(ncpus)};
@@ -144,6 +149,76 @@ bool pin_current_thread_by_mask(int ncores, const CpuSet& procMask) {
     DWORD_PTR mask = *procMask.get();
     return 0 != SetThreadAffinityMask(GetCurrentThread(), mask);
 }
+bool pin_current_thread_to_socket(int socket) {
+    return false;
+}
+#elif __QNX__
+std::tuple<CpuSet, int> get_process_mask() {
+    cpu_set_t *runmask = new cpu_set_t(~0u);
+
+    if (ThreadCtl(_NTO_TCTL_RUNMASK_GET_AND_SET, runmask) != -1) {
+
+        cpu_set_t tmpmask = *runmask;
+        ThreadCtl(_NTO_TCTL_RUNMASK_GET_AND_SET, &tmpmask);
+
+        CpuSet mask{runmask};
+        return std::make_tuple(std::move(mask), static_cast<int>(sizeof(cpu_set_t)));
+    }
+
+    delete runmask;
+    return std::make_tuple(CpuSet(nullptr), 0);
+}
+
+void release_process_mask(cpu_set_t* mask) {
+    delete mask;
+}
+
+bool pin_thread_to_vacant_core(int thrIdx,
+                               int hyperthreads,
+                               int ncores,
+                               const CpuSet& procMask,
+                               const std::vector<int>& cpu_ids) {
+    if (procMask == nullptr) {
+        return false;
+    }
+    const uint32_t mask_val = *procMask.get();
+    const int num_cpus = __builtin_popcount(mask_val);
+    if (num_cpus == 0) {
+        return false;
+    }
+    thrIdx %= num_cpus;
+
+    int mapped_idx = -1;
+    if (cpu_ids.size() > 0) {
+        mapped_idx = cpu_ids[thrIdx];
+    } else {
+        int cpu_idx = 0;
+        for (int i = 0, offset = 0; i < thrIdx; ++i) {
+            cpu_idx += hyperthreads;
+            if (cpu_idx >= num_cpus) {
+                cpu_idx = ++offset;
+            }
+        }
+        while (cpu_idx >= 0) {
+            mapped_idx++;
+            if (mask_val & (1U << mapped_idx)) {
+                --cpu_idx;
+            }
+        }
+    }
+
+    CpuSet targetMask{new uint32_t(1U << mapped_idx)};
+    return pin_current_thread_by_mask(ncores, targetMask);
+}
+
+bool pin_current_thread_by_mask(int ncores, const CpuSet& procMask) {
+    if (procMask == nullptr) {
+        return false;
+    }
+    uint32_t mask = *procMask.get();
+    return ThreadCtl(_NTO_TCTL_RUNMASK_GET_AND_SET, &mask) != -1;
+}
+
 bool pin_current_thread_to_socket(int socket) {
     return false;
 }

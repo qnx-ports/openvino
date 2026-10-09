@@ -6,6 +6,11 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#ifndef GTEST_DISALLOW_COPY_AND_ASSIGN_
+#define GTEST_DISALLOW_COPY_AND_ASSIGN_(type) \
+  type(const type&) = delete; \
+  type& operator=(const type&) = delete
+#endif
 
 // Copied from gtest
 

@@ -42,7 +42,11 @@
 #else
 #include <unistd.h>
 #include <limits.h>
+#if !defined(__QNX__)
 #include <link.h>
+#else
+#include <sys/link.h>
+#endif
 #include <dlfcn.h>
 #endif
 

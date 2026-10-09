@@ -463,7 +463,7 @@ CpuPinningTestCase cpu_pinning_linux_mock_set_default_3 = {
     true,
 };
 
-#if defined(__linux__)
+#if defined(__linux__) || defined(__QNX__)
 INSTANTIATE_TEST_SUITE_P(smoke_CpuPinning,
                          CpuPinningTests,
                          ::testing::Values(cpu_pinning_linux_mock_set_true,

@@ -415,7 +415,7 @@ function(ov_set_threading_interface_for TARGET_NAME)
 
     target_compile_definitions(${TARGET_NAME} ${COMPILE_DEF_TYPE} OV_THREAD=${_ov_thread_define})
 
-    if(NOT THREADING STREQUAL "SEQ")
+    if(NOT THREADING STREQUAL "SEQ" AND NOT QNX)
         find_package(Threads REQUIRED)
         ov_target_link_libraries_as_system(${TARGET_NAME} ${LINK_TYPE} Threads::Threads)
     endif()

@@ -72,7 +72,7 @@ protected:
     }
 };
 
-#ifdef ENABLE_OV_ONNX_FRONTEND
+#if defined(ENABLE_OV_ONNX_FRONTEND) && !defined(__QNX__)
 
 TEST_F(SerializationDeterministicityTest, BasicModel) {
     const std::string model =

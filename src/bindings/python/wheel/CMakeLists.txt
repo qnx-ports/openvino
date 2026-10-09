@@ -104,6 +104,7 @@ set(openvino_wheel_path "${openvino_wheels_output_dir}/${openvino_wheel_name}")
 set(wheel_build_command
     ${Python3_EXECUTABLE} -m pip wheel
         --no-deps
+        --no-build-isolation
         --ignore-requires-python
         --wheel-dir ${openvino_wheels_output_dir}
         --verbose

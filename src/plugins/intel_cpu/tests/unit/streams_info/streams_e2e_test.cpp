@@ -2085,7 +2085,7 @@ StreamGenerateionTestCase generation_tput_1sockets_0cores_1_reservation = {
     {{24, EFFICIENT_CORE_PROC, 4, 0, 0}},
 };
 
-#if defined(__linux__) || defined(_WIN32)
+#if defined(__linux__) || defined(_WIN32) || defined(__QNX__)
 INSTANTIATE_TEST_SUITE_P(smoke_StreamsGeneration,
                          StreamGenerationTests,
                          ::testing::Values(generation_latency_1sockets_14cores_3,

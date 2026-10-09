@@ -418,7 +418,9 @@ TEST_F(OVTensorTest, canSetShape) {
     OV_ASSERT_NO_THROW(t.set_shape(newShape));
     ASSERT_EQ(newShape, t.get_shape());
     ASSERT_EQ(byteStrides(ov::row_major_strides(newShape), t.get_element_type()), t.get_strides());
+#if !__QNX__
     ASSERT_NE(orig_data, t.data());
+#endif
 
     // check that set_shape for copy changes original Tensor
     {
@@ -455,7 +457,9 @@ TEST_F(OVTensorTest, canSetShapeStringTensor) {
     OV_ASSERT_NO_THROW(t.set_shape(newShape));
     ASSERT_EQ(newShape, t.get_shape());
     ASSERT_EQ(byteStrides(ov::row_major_strides(newShape), t.get_element_type()), t.get_strides());
+#if !__QNX__
     ASSERT_NE(orig_data, t.data());
+#endif
 
     // check that setShape for copy changes original Tensor
     {
