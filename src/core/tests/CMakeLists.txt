@@ -49,6 +49,10 @@ ov_add_test_target(
             OV UNIT CORE
 )
 
+if(CMAKE_CROSSCOMPILING)
+    target_compile_definitions(${TARGET_NAME} PRIVATE OPENVINO_IS_CROSS_COMPILED)
+endif()
+
 if(NOT QNX)
     target_link_libraries(${TARGET_NAME} PRIVATE Threads::Threads)
 endif()
