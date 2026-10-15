@@ -40,8 +40,10 @@ elseif(ENABLE_MULTI)
                   VERSION_DEFINES_FOR src/plugin.cpp)
 endif()
 
+if(NOT QNX)
 find_package(Threads REQUIRED)
 target_link_libraries(${TARGET_NAME} PRIVATE Threads::Threads)
+endif()
 
 ov_set_threading_interface_for(${TARGET_NAME})
 

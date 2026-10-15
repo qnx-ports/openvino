@@ -11,6 +11,10 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND MSVC_TOOLSET_VERSION GREATER_EQUAL 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /openmp:experimental")
 endif()
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL QCC)
+    add_compile_options(-fno-tree-vectorize)
+endif()
+
 if(ENABLE_LTO)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
 endif()

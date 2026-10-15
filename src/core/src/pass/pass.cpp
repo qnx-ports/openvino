@@ -39,7 +39,9 @@ std::string ov::pass::PassBase::get_name() const {
         std::unique_ptr<char, void (*)(void*)> demangled_name(
             abi::__cxa_demangle(pass_name.c_str(), nullptr, nullptr, &status),
             std::free);
-        pass_name = demangled_name.get();
+        if (demangled_name) {
+            pass_name = demangled_name.get();
+        }
 #endif
         return pass_name;
     } else {

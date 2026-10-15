@@ -31,7 +31,7 @@ static size_t get_cpu_ram_size() {
     GlobalMemoryStatusEx(&s);
     return s.ullTotalPhys;
 }
-#elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__QNXNTO__)
+#elif defined(__APPLE__) || defined(__FreeBSD__)
 # include <unistd.h>
 # include <sys/sysctl.h>
 
@@ -47,6 +47,23 @@ static size_t get_cpu_ram_size() {
 
     sysctl(query_ram, query_ram_len, &totalram, &length, NULL, 0);
     return totalram;
+}
+#elif defined(__QNX__)
+# include <unistd.h>
+# include <limits.h>
+# include <sys/syspage.h>
+
+static size_t get_cpu_ram_size() {
+    struct asinfo_entry *as = SYSPAGE_ENTRY(asinfo);
+    int n = (int)(SYSPAGE_ENTRY_SIZE(asinfo) / sizeof(*as));
+    const char* strings = SYSPAGE_ENTRY(strings)->data;
+
+    size_t total = 0;
+    for (int i = 0; i < n; i++) {
+        if (strcmp(strings + as[i].name, "ram") == 0)
+            total += as[i].end - as[i].start + 1;
+    }
+    return total;
 }
 #else
 # include <sys/sysinfo.h>

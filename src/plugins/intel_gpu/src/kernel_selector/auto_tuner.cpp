@@ -32,7 +32,11 @@
 #else
 #include <unistd.h>
 #include <limits.h>
+#if !defined(__QNX__)
 #include <link.h>
+#else
+#include <sys/link.h>
+#endif
 #include <dlfcn.h>
 #endif
 
@@ -228,7 +232,7 @@ TuningCache* TuningCache::get() {
     GetModuleFileName(hm, module_path, sizeof(module_path));
     std::string bin_path(module_path);
     path = bin_path.substr(0, bin_path.find_last_of("\\")) + "\\cache.json";
-#elif __linux__
+#elif __linux__ || __QNX__
     const char* device_info_failed_msg = "Device lookup failed";
     Dl_info dl_info;
     dladdr((void*)(device_info_failed_msg), &dl_info);  // NOLINT

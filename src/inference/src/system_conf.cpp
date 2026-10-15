@@ -17,7 +17,7 @@
 #    include <sched.h>
 #endif
 
-#if !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && (defined(__arm__) || defined(__aarch64__))
+#if !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && !defined(__QNX__) && (defined(__arm__) || defined(__aarch64__))
 #    include <asm/hwcap.h> /* Get HWCAP bits from asm/hwcap.h */
 #    include <sys/auxv.h>
 #    define ARM_COMPUTE_CPU_FEATURE_HWCAP_FPHP    (1 << 9)
@@ -40,6 +40,10 @@
 #ifdef __APPLE__
 #    include <sys/sysctl.h>
 #    include <sys/types.h>
+#endif
+
+#ifdef __QNX__
+#    include <sys/neutrino.h>
 #endif
 
 #if defined(OPENVINO_ARCH_X86) || defined(OPENVINO_ARCH_X86_64)
@@ -170,7 +174,7 @@ bool with_cpu_x86_avx512_core_amx() {
     return false;
 }
 bool with_cpu_neon_fp16() {
-#    if !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && \
+#    if !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && !defined(__QNX__) && \
         !defined(__arm__) && defined(__aarch64__)
     const uint32_t hwcaps = getauxval(AT_HWCAP);
     return hwcaps & (ARM_COMPUTE_CPU_FEATURE_HWCAP_FPHP | ARM_COMPUTE_CPU_FEATURE_HWCAP_ASIMDHP);
@@ -188,7 +192,7 @@ bool with_cpu_neon_fp16() {
 #    endif
 }
 bool with_cpu_sve() {
-#    if !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && \
+#    if !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && !defined(__QNX__) && \
         !defined(__arm__) && defined(__aarch64__)
     const uint32_t hwcaps = getauxval(AT_HWCAP);
     return hwcaps & ARM_COMPUTE_CPU_FEATURE_HWCAP_SVE;
@@ -203,7 +207,7 @@ bool with_cpu_sve() {
 }
 
 bool with_cpu_arm_dotprod() {
-#    if !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && \
+#    if !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && !defined(__QNX__) && \
         !defined(__arm__) && defined(__aarch64__)
     const uint32_t hwcaps = getauxval(AT_HWCAP);
     return hwcaps & HWCAP_ASIMDDP;
@@ -222,7 +226,7 @@ bool with_cpu_arm_dotprod() {
 }
 
 bool with_cpu_arm_i8mm() {
-#    if !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && \
+#    if !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && !defined(__QNX__) && \
         !defined(__arm__) && defined(__aarch64__)
     const uint32_t hwcaps2 = getauxval(AT_HWCAP2);
     return hwcaps2 & ARM_COMPUTE_CPU_FEATURE_HWCAP2_I8MM;
@@ -442,7 +446,11 @@ std::vector<int> get_available_numa_nodes() {
 
 int get_current_socket_id() {
     CPU& cpu = cpu_info();
+#if __QNX__
+    int cur_processor_id = SchedGetCpuNum();
+#else
     int cur_processor_id = sched_getcpu();
+#endif
 
     for (auto& row : cpu._cpu_mapping_table) {
         if (cur_processor_id == row[CPU_MAP_PROCESSOR_ID]) {
@@ -455,7 +463,11 @@ int get_current_socket_id() {
 
 int get_current_numa_node_id() {
     CPU& cpu = cpu_info();
+#if __QNX__
+    int cur_processor_id = SchedGetCpuNum();
+#else
     int cur_processor_id = sched_getcpu();
+#endif
 
     for (auto& row : cpu._cpu_mapping_table) {
         if (cur_processor_id == row[CPU_MAP_PROCESSOR_ID]) {

@@ -41,7 +41,6 @@ ov_add_test_target(
             openvino::util
             openvino::shape_inference
             ${CMAKE_DL_LIBS}
-            Threads::Threads
             openvino::conditional_compilation
             openvino::runtime::dev
             openvino::xml_util
@@ -49,6 +48,14 @@ ov_add_test_target(
         LABELS
             OV UNIT CORE
 )
+
+if(CMAKE_CROSSCOMPILING)
+    target_compile_definitions(${TARGET_NAME} PRIVATE OPENVINO_IS_CROSS_COMPILED)
+endif()
+
+if(NOT QNX)
+    target_link_libraries(${TARGET_NAME} PRIVATE Threads::Threads)
+endif()
 
 target_include_directories(${TARGET_NAME} PRIVATE $<TARGET_PROPERTY:openvino_core_obj,SOURCE_DIR>/src
                                                   ${CMAKE_CURRENT_SOURCE_DIR})

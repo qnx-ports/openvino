@@ -23,7 +23,7 @@
 #include "openvino/runtime/properties.hpp"
 #include "openvino/runtime/system_conf.hpp"
 
-#if (defined(OPENVINO_ARCH_ARM64) && defined(__linux__))
+#if (defined(OPENVINO_ARCH_ARM64) && (defined(__linux__) || defined(__QNX__)))
 #    include "cpu/aarch64/cpu_isa_traits.hpp"
 #else
 #    if !defined(OPENVINO_ARCH_RISCV64)
@@ -870,7 +870,7 @@ std::vector<std::vector<int>> get_streams_rank_table(const std::vector<std::vect
     return rank_table;
 }
 
-#if defined(OPENVINO_ARCH_ARM64) && defined(__linux__)
+#if defined(OPENVINO_ARCH_ARM64) && (defined(__linux__) || defined(__QNX__))
 static void configure_arm64_linux_threads(Config& config,
                                           const std::vector<std::vector<int>>& proc_type_table,
                                           bool int8_intensive,
@@ -894,7 +894,7 @@ static void configure_arm64_linux_threads(Config& config,
 }
 #endif
 
-#if defined(OPENVINO_ARCH_ARM) && defined(__linux__)
+#if defined(OPENVINO_ARCH_ARM) && (defined(__linux__) || defined(__QNX__))
 void configure_arm_linux_threads(Config& config,
                                  const std::vector<std::vector<int>>& proc_type_table,
                                  const ov::MemBandwidthPressure& tolerance,
@@ -1072,7 +1072,7 @@ int get_model_prefer_threads(const int num_streams,
 
         config.modelPreferThreads = 0;
 
-#if defined(OPENVINO_ARCH_ARM64) && defined(__linux__)
+#if defined(OPENVINO_ARCH_ARM64) && (defined(__linux__) || defined(__QNX__))
         configure_arm64_linux_threads(config, proc_type_table, int8_intensive, is_LLM);
         (void)isaSpecificThreshold;
 #else
@@ -1099,7 +1099,7 @@ int get_model_prefer_threads(const int num_streams,
                                                  memThresholdAssumeLimitedForISA,
                                                  config.inferencePrecision);
 
-#    if defined(OPENVINO_ARCH_ARM) && defined(__linux__)
+#    if defined(OPENVINO_ARCH_ARM) && (defined(__linux__) || defined(__QNX__))
         configure_arm_linux_threads(config, proc_type_table, networkToleranceForLowCache, int8_intensive, is_LLM);
 
 #    elif (defined(OPENVINO_ARCH_ARM) || defined(OPENVINO_ARCH_ARM64)) && defined(__APPLE__)

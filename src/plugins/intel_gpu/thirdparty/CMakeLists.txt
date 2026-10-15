@@ -59,7 +59,7 @@ if(ENABLE_ONEDNN_FOR_GPU)
                                    CMAKE_SYSTEM_PROCESSOR CMAKE_TOOLCHAIN_FILE
                                    CMAKE_VERBOSE_MAKEFILE CMAKE_GENERATOR
                                    CMAKE_CXX_COMPILER CMAKE_C_COMPILER
-                                   CMAKE_CXX_COMPILER_LAUNCHER CMAKE_C_COMPILER_LAUNCHER)
+                                   CMAKE_CXX_COMPILER_LAUNCHER CMAKE_C_COMPILER_LAUNCHER QNX)
             if(${cmake_var})
                 list(APPEND cmake_extra_args "-D${cmake_var}=${${cmake_var}}")
             endif()

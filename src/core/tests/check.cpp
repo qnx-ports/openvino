@@ -50,6 +50,9 @@ TEST(check, check_with_explanation) {
 }
 
 TEST(check, ov_throw_exception_check_relative_path_to_source) {
+#ifdef OPENVINO_IS_CROSS_COMPILED
+    GTEST_SKIP() << "Absolute paths likely differ in cross-compiled environments.";
+#endif
     // github actions use sccache which doesn't support /d1trimfile compile option
     if (std::getenv("GITHUB_ACTIONS")) {
         GTEST_SKIP();

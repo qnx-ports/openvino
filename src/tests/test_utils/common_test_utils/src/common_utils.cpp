@@ -18,6 +18,9 @@
 #    include <windows.h>
 
 #    include "psapi.h"
+#elif __QNX__
+#include <sys/procfs.h>
+#include <fcntl.h>
 #endif
 
 namespace ov {
@@ -69,6 +72,50 @@ size_t getVmSizeInKB() {
 
 size_t getVmRSSInKB() {
     return getMemoryInfo().WorkingSetSize / 1024;
+}
+
+#elif __QNX__
+struct QNX_MEMORY_COUNTERS {
+    size_t map_size;
+    size_t rss;
+};
+
+static QNX_MEMORY_COUNTERS getMemoryInfo() {
+    QNX_MEMORY_COUNTERS pmc = {0, 0};
+
+    long page_size = sysconf(_SC_PAGESIZE);
+    if (page_size <= 0) page_size = 4096;
+
+    std::ifstream file("/proc/self/vmstat");
+    if (!file.is_open()) return pmc;
+
+    auto parseLine = [](const std::string& line) -> size_t {
+        size_t pos = line.find("0x");
+        if (pos == std::string::npos) {
+            throw std::runtime_error("Can't get system memory values");
+        }
+        return std::stoull(line.substr(pos), nullptr, 16);
+    };
+
+    std::string line;
+    while (std::getline(file, line)) {
+        if (line.find("as_stats.map_size") != std::string::npos) {
+            pmc.map_size = (parseLine(line) * page_size) / 1024;
+        }
+        else if (line.find("as_stats.rss") != std::string::npos) {
+            pmc.rss = (parseLine(line) * page_size) / 1024;
+        }
+    }
+
+    return pmc;
+}
+
+size_t getVmSizeInKB() {
+    return getMemoryInfo().map_size;
+}
+
+size_t getVmRSSInKB() {
+    return getMemoryInfo().rss;
 }
 
 #else

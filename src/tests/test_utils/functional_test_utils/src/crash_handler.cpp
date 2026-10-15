@@ -6,6 +6,9 @@
 
 #include <limits.h>
 #include <signal.h>
+#if defined(__QNX__)
+#include <unix.h>
+#endif
 
 #include "functional_test_utils/summary/api_summary.hpp"
 #include "functional_test_utils/summary/op_summary.hpp"
@@ -14,7 +17,7 @@ namespace ov {
 namespace test {
 namespace utils {
 
-#if defined(__APPLE__)
+#if defined(__APPLE__) || defined(__QNX__)
 typedef sig_t sighandler;
 #elif defined(_WIN32)
 #    ifdef __GNUC__

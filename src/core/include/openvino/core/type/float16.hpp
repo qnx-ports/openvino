@@ -222,4 +222,43 @@ public:
     static constexpr bool tinyness_before = false;
     static constexpr float_round_style round_style = round_to_nearest;
 };
+#if defined(__QNX__)
+#ifdef isnan
+#undef isnan
+#endif
+#ifdef isfinite
+#undef isfinite
+#endif
+#ifdef isinf
+#undef isinf
+#endif
+
+template <typename T,
+            typename std::enable_if<
+                std::is_convertible<T, float>::value &&
+                !std::is_arithmetic<T>::value,
+                int
+            >::type = 0>
+inline bool isnan(const T& val) {
+    return std::isnan(static_cast<float>(val));
+}
+template <typename T,
+            typename std::enable_if<
+                std::is_convertible<T, float>::value &&
+                !std::is_arithmetic<T>::value,
+                int
+            >::type = 0>
+inline bool isfinite(const T& val) {
+    return std::isfinite(static_cast<float>(val));
+}
+template <typename T,
+            typename std::enable_if<
+                std::is_convertible<T, float>::value &&
+                !std::is_arithmetic<T>::value,
+                int
+            >::type = 0>
+inline bool isinf(const T& val) {
+    return std::isinf(static_cast<float>(val));
+}
+#endif
 }  // namespace std

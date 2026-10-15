@@ -54,9 +54,12 @@ target_link_libraries(${TARGET_NAME}
     openvino::shape_inference
     openvino::pugixml
     ${CMAKE_DL_LIBS}
-    Threads::Threads
     PUBLIC $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.1>>:stdc++fs>
     $<$<AND:$<CXX_COMPILER_ID:Clang>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,9.0>>:c++fs>)
+
+if(NOT QNX)
+    target_link_libraries(${TARGET_NAME} Threads::Threads)
+endif()
 
 if(BUILD_SHARED_LIBS)
     target_link_libraries(${TARGET_NAME} PRIVATE openvino::shutdown)

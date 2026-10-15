@@ -34,8 +34,14 @@ if(ARM_COMPUTE_INCLUDE_DIR OR ARM_COMPUTE_LIB_DIR)
             endif()
         endif()
 
+        if(QNX)
+            set(acl_lib_name arm_compute)
+        else()
+            set(acl_lib_name arm_compute-static)
+        endif()
+
         find_library(ARM_COMPUTE_LIB
-                     NAMES arm_compute-static
+                     NAMES ${acl_lib_name}
                      PATHS ${ARM_COMPUTE_LIB_DIR}
                      ${extra_args})
         unset(extra_args)
@@ -49,9 +55,13 @@ if(ARM_COMPUTE_INCLUDE_DIR OR ARM_COMPUTE_LIB_DIR)
 
         add_library(arm_compute::half INTERFACE IMPORTED GLOBAL)
 
+        if(QNX)
+            list(APPEND ARM_COMPUTE_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/ComputeLibrary")
+        endif()
+
         if(ARM_COMPUTE_INCLUDE_DIR)
             set_target_properties(arm_compute::arm_compute arm_compute::half PROPERTIES
-                INTERFACE_INCLUDE_DIRECTORIES ${ARM_COMPUTE_INCLUDE_DIR})
+                INTERFACE_INCLUDE_DIRECTORIES "${ARM_COMPUTE_INCLUDE_DIR}")
         endif()
     endif()
 

@@ -124,10 +124,12 @@ static bool convert_range_precision(const std::shared_ptr<ov::Node>& node) {
     return false;
 }
 
-static const std::unordered_map<ov::NodeTypeInfo, std::function<bool(const std::shared_ptr<ov::Node>&)>>
-    output_conversion_methods = {
+const std::unordered_map<ov::NodeTypeInfo, std::function<bool(const std::shared_ptr<ov::Node>&)>>& get_output_conversion_methods() {
+    static const std::unordered_map<ov::NodeTypeInfo, std::function<bool(const std::shared_ptr<ov::Node>&)>> methods = {
         {ov::op::v4::Range::get_type_info_static(), convert_range_precision},
-};
+    };
+    return methods;
+}
 
 std::shared_ptr<ov::Node> ov::util::convert_to_supported_precision(Node* const node) {
     return ov::util::convert_to_supported_precision(node, node->input_values());
@@ -199,8 +201,8 @@ std::shared_ptr<ov::Node> ov::util::convert_to_supported_precision(Node* const n
     }
 
     // Handle nodes which outputs precisions don't depend on input precisions
-    auto method_it = output_conversion_methods.find(cloned_node->get_type_info());
-    if (method_it != output_conversion_methods.end()) {
+    auto method_it = get_output_conversion_methods().find(cloned_node->get_type_info());
+    if (method_it != get_output_conversion_methods().end()) {
         if (method_it->second(cloned_node)) {
             cloned_node->validate_and_infer_types();
         }
