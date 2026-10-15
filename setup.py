@@ -31,14 +31,18 @@ PYTHON_VERSION = f"python{sys.version_info.major}.{sys.version_info.minor}{suffi
 
 LIBS_DIR = "bin" if platform.system() == "Windows" else "lib"
 
-machine = platform.machine()
+if sys.platform.startswith("qnx"):
+    machine = platform.processor()
+else:
+    machine = platform.machine()
+
 if machine == "x86_64" or machine == "AMD64" or machine == "x86pc":
     ARCH = "intel64"
 elif machine == "X86" or machine == "i686":
     ARCH = "ia32"
 elif machine == "arm" or machine == "armv7l":
     ARCH = "arm"
-elif machine == "aarch64" or machine == "arm64" or machine == "ARM64":
+elif machine == "aarch64" or machine == "arm64" or machine == "ARM64" or machine == "aarch64le":
     ARCH = "arm64"
 elif machine == "riscv64":
     ARCH = "riscv64"
